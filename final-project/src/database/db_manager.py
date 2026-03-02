@@ -585,7 +585,7 @@ class Database:
                 'afternoon_status': a_status
             })
         
-        return grouped_data dibino bading
+        return grouped_data
 
     def check_timeslot_attendance(self, event_id: str, school_id: str, time_slot: str) -> bool:
         """Check if student already checked in for specific time slot."""
