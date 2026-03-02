@@ -105,9 +105,20 @@ class Database:
         )
         """
         
+        activity_log_sql = """
+        CREATE TABLE IF NOT EXISTS activity_log (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp TEXT NOT NULL,
+            action TEXT NOT NULL,
+            user TEXT NOT NULL,
+            details TEXT
+        )
+        """
+        
         self._execute(event_table_sql)
         self._execute(attendance_table_sql)
         self._execute(users_table_sql)
+        self._execute(activity_log_sql)
         
         # Add columns to existing tables if they don't exist (migration)
         self._add_column_if_not_exists('users', 'role', "TEXT DEFAULT 'scanner'")
@@ -574,7 +585,7 @@ class Database:
                 'afternoon_status': a_status
             })
         
-        return grouped_data
+        return grouped_data dibino bading
 
     def check_timeslot_attendance(self, event_id: str, school_id: str, time_slot: str) -> bool:
         """Check if student already checked in for specific time slot."""
@@ -585,7 +596,7 @@ class Database:
         """
         result = self._execute(query, (event_id, school_id), fetch_one=True)
         
-        return result and result[0] == 'Present'
+        return result == 'Present'
 
     def get_student_by_id(self, school_id: str) -> dict:
         """Get student information by school ID."""
@@ -765,3 +776,28 @@ class Database:
         except sqlite3.Error as e:
             print(f"Error getting scans by scanner: {e}")
             return []
+
+    # Flask wrapper methods
+    def get_user(self, username: str):
+        """Get user details (Flask wrapper)."""
+        query = "SELECT username, password, full_name, role FROM users WHERE username = ?"
+        return self._execute(query, (username,), fetch_one=True)
+    
+    def add_user(self, username: str, password: str, full_name: str, role: str = 'scanner') -> bool:
+        """Add new user (Flask wrapper)."""
+        return self.create_user(username, password, full_name, role)
+    
+    def add_event(self, event_id: str, name: str, date: str, description: str = "") -> bool:
+        """Add new event (Flask wrapper)."""
+        query = "INSERT INTO events (id, name, date, description) VALUES (?, ?, ?, ?)"
+        try:
+            self._execute(query, (event_id, name, date, description), commit=True)
+            return True
+        except Exception as e:
+            print(f"Error adding event: {e}")
+            return False
+    
+    def get_event(self, event_id: str):
+        """Get event details (Flask wrapper)."""
+        query = "SELECT id, name, date, description FROM events WHERE id = ?"
+        return self._execute(query, (event_id,), fetch_one=True)

@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Activity Log - MaScan{% endblock %}
+
+{% block content %}
+<div class="activity-container">
+    <h1>Activity Log</h1>
+    <p>View all system activities and actions</p>
+
+    {% if activities %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Action</th>
+                <th>User</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for activity in activities %}
+            <tr>
+                <td>{{ activity[1] }}</td>
+                <td><span class="action-badge">{{ activity[2] }}</span></td>
+                <td>{{ activity[3] }}</td>
+                <td>{{ activity[4] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="text-muted">No activities yet</p>
+    {% endif %}
+</div>
+
+<style>
+.activity-container {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.activity-container h1 {
+    margin: 0 0 5px 0;
+}
+
+.activity-container p {
+    margin: 0 0 20px 0;
+    color: #666;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th {
+    background: #f5f5f5;
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.table td {
+    padding: 12px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.table tbody tr:hover {
+    background: #f9f9f9;
+}
+
+.action-badge {
+    display: inline-block;
+    background: #e3f2fd;
+    color: #0d47a1;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.85em;
+}
+
+.text-muted {
+    color: #999;
+    text-align: center;
+    padding: 40px;
+}
+</style>
+{% endblock %}

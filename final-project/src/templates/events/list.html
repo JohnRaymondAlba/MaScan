@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}Events - MaScan{% endblock %}
+
+{% block content %}
+<div class="events-header">
+    <div>
+        <h1>Events</h1>
+        <p>Manage and view all events</p>
+    </div>
+    {% if user_role == 'admin' %}
+    <a href="{{ url_for('event.create_event') }}" class="btn btn-primary">+ Create Event</a>
+    {% endif %}
+</div>
+
+{% if events %}
+<div class="events-grid">
+    {% for event in events %}
+    <div class="event-card">
+        <div class="event-date">{{ event[2] }}</div>
+        <h3>{{ event[1] }}</h3>
+        {% if event[3] %}
+        <p class="event-description">{{ event[3] }}</p>
+        {% endif %}
+        <div class="event-actions">
+            <a href="{{ url_for('event.view_event', event_id=event[0]) }}" class="btn btn-small btn-primary">View</a>
+            <a href="{{ url_for('attendance.attendance_history', event_id=event[0]) }}" class="btn btn-small btn-secondary">Attendance</a>
+            {% if user_role == 'admin' %}
+            <a href="{{ url_for('event.edit_event', event_id=event[0]) }}" class="btn btn-small btn-secondary">Edit</a>
+            <a href="{{ url_for('event.export_event', event_id=event[0]) }}" class="btn btn-small btn-secondary">Export</a>
+            <form method="POST" action="{{ url_for('event.delete_event', event_id=event[0]) }}" style="display: inline;" onclick="return confirm('Are you sure?');">
+                <button type="submit" class="btn btn-small btn-danger">Delete</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <p>No events yet. Create one to get started!</p>
+    {% if user_role == 'admin' %}
+    <a href="{{ url_for('event.create_event') }}" class="btn btn-primary">Create Event</a>
+    {% endif %}
+</div>
+{% endif %}
+
+<style>
+.events-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.events-header h1 {
+    margin: 0 0 5px 0;
+}
+
+.events-header p {
+    margin: 0;
+    color: #666;
+}
+
+.events-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.event-card {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.event-card:hover {
+    box-shadow: 0 4px 12px rgba(42, 115, 255, 0.1);
+    border-color: #2A73FF;
+}
+
+.event-date {
+    display: inline-block;
+    background: #e3f2fd;
+    color: #0d47a1;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.event-card h3 {
+    margin: 10px 0;
+    color: #333;
+}
+
+.event-description {
+    color: #666;
+    font-size: 0.95em;
+    margin-bottom: 15px;
+}
+
+.event-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.btn-small {
+    padding: 6px 12px;
+    font-size: 0.85em;
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+}
+</style>
+{% endblock %}

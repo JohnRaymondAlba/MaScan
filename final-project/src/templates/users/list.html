@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Users - MaScan{% endblock %}
+
+{% block content %}
+<div class="users-header">
+    <div>
+        <h1>Users</h1>
+        <p>Manage system users and permissions</p>
+    </div>
+    <a href="{{ url_for('user.create_user') }}" class="btn btn-primary">+ Add User</a>
+</div>
+
+{% if users %}
+<table class="table">
+    <thead>
+        <tr>
+            <th>Username</th>
+            <th>Full Name</th>
+            <th>Role</th>
+            <th>Created</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>{{ user[0] }}</td>
+            <td>{{ user[1] }}</td>
+            <td><span class="role-badge role-{{ user[2] }}">{{ user[2] }}</span></td>
+            <td>{{ user[3] }}</td>
+            <td>
+                <a href="{{ url_for('user.edit_user', target_username=user[0]) }}" class="btn btn-small btn-secondary">Edit</a>
+                {% if user[0] != session.get('username') %}
+                <form method="POST" action="{{ url_for('user.delete_user', target_username=user[0]) }}" style="display: inline;" onclick="return confirm('Are you sure?');">
+                    <button type="submit" class="btn btn-small btn-danger">Delete</button>
+                </form>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="empty-state">
+    <p>No users yet</p>
+</div>
+{% endif %}
+
+<style>
+.users-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.users-header h1 {
+    margin: 0 0 5px 0;
+}
+
+.users-header p {
+    margin: 0;
+    color: #666;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.table th {
+    background: #f5f5f5;
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.table td {
+    padding: 12px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.table tbody tr:hover {
+    background: #f9f9f9;
+}
+
+.role-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.85em;
+}
+
+.role-admin {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.role-scanner {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.btn-small {
+    padding: 6px 12px;
+    font-size: 0.85em;
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+}
+</style>
+{% endblock %}

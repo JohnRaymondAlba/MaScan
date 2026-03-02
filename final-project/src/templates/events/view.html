@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}{{ event[1] }} - MaScan{% endblock %}
+
+{% block content %}
+<div class="event-detail">
+    <div class="event-header-detail">
+        <div>
+            <h1>{{ event[1] }}</h1>
+            <p>{{ event[2] }}</p>
+        </div>
+        <div class="event-actions-detail">
+            {% if user_role == 'admin' %}
+            <a href="{{ url_for('event.edit_event', event_id=event[0]) }}" class="btn btn-secondary">Edit</a>
+            <a href="{{ url_for('event.export_event', event_id=event[0]) }}" class="btn btn-secondary">Export PDF</a>
+            {% endif %}
+            <a href="{{ url_for('event.list_events') }}" class="btn btn-secondary">Back</a>
+        </div>
+    </div>
+
+    {% if event[3] %}
+    <div class="event-description-box">
+        <h3>Description</h3>
+        <p>{{ event[3] }}</p>
+    </div>
+    {% endif %}
+
+    <div class="attendance-summary">
+        <h2>Attendance Summary</h2>
+        {% if attendance %}
+        <p>Total marked: <strong>{{ attendance|length }}</strong></p>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Employee ID</th>
+                    <th>Name</th>
+                    <th>Time Slot</th>
+                    <th>Status</th>
+                    <th>Marked At</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in attendance %}
+                <tr>
+                    <td>{{ record[1] }}</td>
+                    <td>{{ record[2] }}</td>
+                    <td>{{ record[5] if record|length > 5 else 'morning' }}</td>
+                    <td><span class="badge badge-success">{{ record[4] }}</span></td>
+                    <td>{{ record[3] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted">No attendance records yet</p>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.event-detail {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.event-header-detail {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.event-header-detail h1 {
+    margin: 0 0 10px 0;
+    font-size: 2em;
+}
+
+.event-header-detail p {
+    margin: 0;
+    color: #666;
+    font-size: 1.1em;
+}
+
+.event-actions-detail {
+    display: flex;
+    gap: 10px;
+}
+
+.event-description-box {
+    background: #f5f5f5;
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 30px;
+}
+
+.event-description-box h3 {
+    margin-top: 0;
+}
+
+.attendance-summary h2 {
+    margin-bottom: 20px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th {
+    background: #f5f5f5;
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.table td {
+    padding: 12px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.table tbody tr:hover {
+    background: #f9f9f9;
+}
+
+.badge-success {
+    display: inline-block;
+    background: #d4edda;
+    color: #155724;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.85em;
+}
+
+.text-muted {
+    color: #999;
+}
+</style>
+{% endblock %}
