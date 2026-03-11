@@ -26,6 +26,7 @@
                 <a href="{{ url_for('event.list_events') }}" class="nav-link">Events</a>
                 <a href="{{ url_for('attendance.scanner') }}" class="nav-link">Scanner</a>
                 {% if session.get('username') == 'admin' or user_role == 'admin' %}
+                <a href="{{ url_for('qr_mgmt.manage_qr') }}" class="nav-link">QR Management</a>
                 <a href="{{ url_for('user.list_users') }}" class="nav-link">Users</a>
                 {% endif %}
                 <a href="{{ url_for('dashboard.activity_log') }}" class="nav-link">Activity Log</a>
