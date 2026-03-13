@@ -1368,7 +1368,7 @@ document.getElementById('delete-selected-btn').addEventListener('click', async (
 
 // Download single QR code
 function downloadSingleQR(schoolId) {
-    window.location.href = `{{ url_for("qr_mgmt.download_single_qr", school_id="") }}`.replace('', schoolId);
+    window.location.href = `{{ url_for("qr_mgmt.download_single_qr", school_id="PLACEHOLDER") }}`.replace('PLACEHOLDER', schoolId);
 }
 
 // Delete QR code
@@ -1381,7 +1381,7 @@ async function deleteQRCode(schoolId) {
         qrName,
         async () => {
             try {
-                const response = await fetch(`{{ url_for("qr_mgmt.delete_qr", school_id="") }}`.replace('', schoolId), {
+                const response = await fetch(`{{ url_for("qr_mgmt.delete_qr", school_id="PLACEHOLDER") }}`.replace('PLACEHOLDER', schoolId), {
                     method: 'POST'
                 });
 
