@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 # utils/pdf_export.py
 """Enhanced PDF export with section grouping."""
 
@@ -253,7 +252,6 @@ class AttendancePDFExporter:
             return grouped_data
         except Exception as e:
             print(f"Fallback method failed: {e}")
-=======
 # utils/pdf_export.py
 """Enhanced PDF export with section grouping."""
 
@@ -508,5 +506,4 @@ class AttendancePDFExporter:
             return grouped_data
         except Exception as e:
             print(f"Fallback method failed: {e}")
->>>>>>> Stashed changes
             return {}

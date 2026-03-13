@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 """Event management routes."""
 
 from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify
@@ -173,7 +172,6 @@ def export_event(event_id):
     except Exception as e:
         print(f"Error generating PDF: {e}")
         return redirect(url_for('event.view_event', event_id=event_id))
-=======
 """Event management routes."""
 
 from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify
@@ -348,4 +346,3 @@ def export_event(event_id):
     except Exception as e:
         print(f"Error generating PDF: {e}")
         return redirect(url_for('event.view_event', event_id=event_id))
->>>>>>> Stashed changes

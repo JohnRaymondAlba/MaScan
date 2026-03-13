@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 """QR Scanning and attendance routes."""
 
 from flask import Blueprint, render_template, request, session, jsonify, redirect, url_for
@@ -197,7 +196,6 @@ def quick_mark():
     
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-=======
 """QR Scanning and attendance routes."""
 
 from flask import Blueprint, render_template, request, session, jsonify, redirect, url_for
@@ -363,4 +361,3 @@ def quick_mark():
     
     except Exception as e:
         return jsonify({'error': str(e)}), 500
->>>>>>> Stashed changes

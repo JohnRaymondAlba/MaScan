@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 """API routes."""
 
 from flask import Blueprint, request, jsonify, session
@@ -200,7 +199,6 @@ def api_get_users():
     
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-=======
 """API routes."""
 
 from flask import Blueprint, request, jsonify, session
@@ -402,4 +400,3 @@ def api_get_users():
     
     except Exception as e:
         return jsonify({'error': str(e)}), 500
->>>>>>> Stashed changes

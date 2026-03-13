@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 # 🎯 MaScan - QR Attendance System
 
 A modern Flask-based web application for managing employee attendance using QR code scanning. MaScan streamlines the attendance tracking process with an intuitive interface, real-time event management, and comprehensive reporting.
@@ -286,7 +285,6 @@ For issues or questions, please refer to the project documentation or check the 
 ---
 
 **Happy Scanning! 🎯**
-=======
 # 🎯 MaScan - QR Attendance System
 
 A modern Flask-based web application for managing employee attendance using QR code scanning. MaScan streamlines the attendance tracking process with an intuitive interface, real-time event management, and comprehensive reporting.
@@ -574,4 +572,4 @@ For issues or questions, please refer to the project documentation or check the 
 ---
 
 **Happy Scanning! 🎯**
->>>>>>> Stashed changes
+
