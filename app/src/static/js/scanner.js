@@ -173,10 +173,19 @@ function markAttendance(qrData) {
             const tbody = document.getElementById('attendance-body');
             const row = tbody.insertRow(-1);
             row.className = 'new-scan-row';
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            const formattedTime = `${hours}:${minutes}:${seconds} - ${day}/${month}/${year}`;
+            
             row.innerHTML = `
                 <td>${response.user_id}</td>
                 <td>${response.user_name}</td>
-                <td>${new Date().toLocaleTimeString()}</td>
+                <td>${formattedTime}</td>
             `;
             row.style.animation = 'slideInRow 0.4s ease-out';
 
@@ -256,7 +265,13 @@ function loadMarkedAttendees() {
                     row.className = 'new-scan-row';
                     
                     const timeObj = new Date(attendee.timestamp);
-                    const timeString = timeObj.toLocaleTimeString();
+                    const hours = String(timeObj.getHours()).padStart(2, '0');
+                    const minutes = String(timeObj.getMinutes()).padStart(2, '0');
+                    const seconds = String(timeObj.getSeconds()).padStart(2, '0');
+                    const day = String(timeObj.getDate()).padStart(2, '0');
+                    const month = String(timeObj.getMonth() + 1).padStart(2, '0');
+                    const year = timeObj.getFullYear();
+                    const timeString = `${hours}:${minutes}:${seconds} - ${day}/${month}/${year}`;
                     
                     row.innerHTML = `
                         <td>${attendee.user_id}</td>
