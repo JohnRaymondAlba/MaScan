@@ -11,6 +11,10 @@ werkzeug==3.0.1
 # Session & Cache (for Vercel/Production)
 redis==5.0.1
 
+# Database (Supabase/PostgreSQL)
+sqlalchemy==2.0.23
+psycopg2-binary==2.9.9
+
 # PDF Export
 reportlab==4.0.7
 
