@@ -1,7 +1,7 @@
 """API routes."""
 
 from flask import Blueprint, request, jsonify, session
-from database.db_manager import Database
+from database import db
 from functools import wraps
 import os
 from dotenv import load_dotenv
@@ -12,7 +12,6 @@ from config.constants import EMPLOYEES
 load_dotenv()
 
 api_bp = Blueprint('api', __name__)
-db = Database()
 
 API_KEY = os.getenv('API_KEY', 'mascan-api-key-2024')
 
@@ -202,21 +201,6 @@ def api_get_users():
     
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-"""API routes."""
-
-from flask import Blueprint, request, jsonify, session
-from database.db_manager import Database
-from functools import wraps
-import os
-from dotenv import load_dotenv
-from datetime import datetime
-from config.constants import EMPLOYEES
-
-# Load environment variables
-load_dotenv()
-
-api_bp = Blueprint('api', __name__)
-db = Database()
 
 API_KEY = os.getenv('API_KEY', 'mascan-api-key-2024')
 

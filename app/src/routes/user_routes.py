@@ -1,13 +1,12 @@
 """User management routes."""
 
 from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify
-from database.db_manager import Database
+from database import db
 from routes.auth_routes import login_required, admin_required
 import uuid
 from datetime import datetime
 
 user_bp = Blueprint('user', __name__, url_prefix='/users')
-db = Database()
 
 
 @user_bp.route('/')

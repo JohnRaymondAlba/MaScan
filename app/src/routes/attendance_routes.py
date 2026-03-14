@@ -1,13 +1,12 @@
 """QR Scanning and attendance routes."""
 
 from flask import Blueprint, render_template, request, session, jsonify, redirect, url_for
-from database.db_manager import Database
+from database import db
 from routes.auth_routes import login_required
 from datetime import datetime
 import uuid
 
 attendance_bp = Blueprint('attendance', __name__, url_prefix='/scan')
-db = Database()
 
 
 @attendance_bp.route('/')

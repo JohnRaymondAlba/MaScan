@@ -1,11 +1,10 @@
 """Authentication routes."""
 
 from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify
-from database.db_manager import Database
+from database import db
 from functools import wraps
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/')
-db = Database()
 
 
 def login_required(f):

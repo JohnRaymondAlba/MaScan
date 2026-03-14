@@ -1,13 +1,12 @@
 """Event management routes."""
 
 from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify
-from database.db_manager import Database
+from database import db
 from routes.auth_routes import login_required, admin_required
 import uuid
 from datetime import datetime
 
 event_bp = Blueprint('event', __name__, url_prefix='/events')
-db = Database()
 
 
 def safe_parse_date(date_str):

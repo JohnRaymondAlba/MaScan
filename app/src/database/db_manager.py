@@ -606,3 +606,96 @@ class Database:
         except Exception as e:
             print(f"Error: {e}")
             return None
+    
+    # Backward compatibility method for direct SQL queries (SQLite-style)
+    def _execute(self, query: str, params: tuple = (), commit: bool = True, 
+                 fetch_all: bool = False, fetch_one: bool = False):
+        """Execute raw SQL (backward compatibility). Note: Only works if using SQLite!"""
+        try:
+            # For Supabase/PostgreSQL, convert SQLite syntax to raw SQL execution
+            session = self._get_session()
+            from sqlalchemy import text
+            
+            # Convert ? placeholders to %s for PostgreSQL
+            pg_query = query.replace('?', '%s')
+            result_data = session.execute(text(pg_query), params or {})
+            session.commit()
+            
+            if fetch_one:
+                result = result_data.first()
+                session.close()
+                return result
+            elif fetch_all:
+                result = result_data.all()
+                session.close()
+                return result
+            else:
+                session.close()
+                return result_data.rowcount
+        except Exception as e:
+            print(f"Error executing SQL: {e}")
+            session.close() if 'session' in locals() else None
+            return [] if fetch_all else None
+    
+    def record_timeslot_attendance(self, event_id: str, user_id: str, time_slot: str) -> bool:
+        """Record attendance for a specific time slot (backward compat)."""
+        try:
+            session = self._get_session()
+            from datetime import datetime
+            
+            # Try to update existing record
+            record = session.query(AttendanceTimeslot).filter_by(
+                event_id=event_id,
+                user_id=user_id
+            ).first()
+            
+            time_now = datetime.now().strftime("%H:%M:%S")
+            date_now = datetime.now().strftime("%Y-%m-%d")
+            
+            if record:
+                # Update existing record for the time slot
+                if time_slot == 'morning':
+                    record.morning_time = time_now
+                    record.morning_status = 'Present'
+                elif time_slot == 'lunch':
+                    record.lunch_time = time_now
+                    record.lunch_status = 'Present'
+                elif time_slot == 'afternoon':
+                    record.afternoon_time = time_now
+                    record.afternoon_status = 'Present'
+                session.commit()
+            else:
+                # Create new record
+                data = {
+                    'event_id': event_id,
+                    'user_id': user_id,
+                    'date_recorded': date_now
+                }
+                if time_slot == 'morning':
+                    data.update({'morning_time': time_now, 'morning_status': 'Present'})
+                elif time_slot == 'lunch':
+                    data.update({'lunch_time': time_now, 'lunch_status': 'Present'})
+                elif time_slot == 'afternoon':
+                    data.update({'afternoon_time': time_now, 'afternoon_status': 'Present'})
+                
+                record = AttendanceTimeslot(**data)
+                session.add(record)
+                session.commit()
+            
+            session.close()
+            return True
+        except Exception as e:
+            print(f"Error: {e}")
+            return False
+    
+    def get_event(self, event_id: str):
+        """Get event (Flask wrapper)."""
+        try:
+            session = self._get_session()
+            event = session.query(Event).filter_by(id=event_id).first()
+            result = (event.id, event.name, event.date, event.description) if event else None
+            session.close()
+            return result
+        except Exception as e:
+            print(f"Error: {e}")
+            return None

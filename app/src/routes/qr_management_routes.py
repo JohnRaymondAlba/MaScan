@@ -1,7 +1,7 @@
 """QR Code Management routes - CSV import and QR code generation."""
 
 from flask import Blueprint, render_template, request, session, jsonify, send_file, redirect, url_for
-from database.db_manager import Database
+from database import db
 from routes.auth_routes import login_required, admin_required
 import csv
 import io
@@ -12,7 +12,6 @@ import json
 import zipfile
 
 qr_mgmt_bp = Blueprint('qr_mgmt', __name__, url_prefix='/qr-management')
-db = Database()
 
 
 @qr_mgmt_bp.route('/')

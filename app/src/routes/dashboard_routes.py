@@ -1,12 +1,11 @@
 """Dashboard routes."""
 
 from flask import Blueprint, render_template, session, redirect, url_for, jsonify
-from database.db_manager import Database
+from database import db
 from routes.auth_routes import login_required, admin_required
 from datetime import datetime, timedelta
 
 dashboard_bp = Blueprint('dashboard', __name__, url_prefix='/')
-db = Database()
 
 
 @dashboard_bp.route('/')
