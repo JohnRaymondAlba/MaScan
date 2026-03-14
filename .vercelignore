@@ -1,0 +1,13 @@
+flask_session/
+.git
+.gitignore
+__pycache__/
+*.pyc
+.venv/
+.env.local
+.env.*.local
+node_modules/
+.DS_Store
+*.egg-info/
+dist/
+build/

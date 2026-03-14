@@ -18,9 +18,25 @@ def create_app():
     
     # Configuration
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'mascan-attendance-secret-key-2024')
-    app.config['SESSION_TYPE'] = 'filesystem'
     app.config['PERMANENT_SESSION_LIFETIME'] = 86400  # 24 hours
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file upload
+    
+    # Determine environment and configure sessions accordingly
+    env = os.getenv('FLASK_ENV', 'development')
+    redis_url = os.getenv('REDIS_URL')
+    
+    if env == 'production' and redis_url:
+        # Use Redis for production (Vercel)
+        try:
+            import redis
+            app.config['SESSION_TYPE'] = 'redis'
+            app.config['SESSION_REDIS'] = redis.from_url(redis_url)
+        except ImportError:
+            # Fallback to filesystem if redis not available
+            app.config['SESSION_TYPE'] = 'filesystem'
+    else:
+        # Use filesystem for local development
+        app.config['SESSION_TYPE'] = 'filesystem'
     
     # Enable CORS
     CORS(app)

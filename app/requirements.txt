@@ -8,6 +8,9 @@ python-dotenv==1.0.0
 bcrypt==4.1.2
 werkzeug==3.0.1
 
+# Session & Cache (for Vercel/Production)
+redis==5.0.1
+
 # PDF Export
 reportlab==4.0.7
 
