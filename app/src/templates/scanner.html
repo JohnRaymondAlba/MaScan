@@ -66,7 +66,12 @@
 
                 <div id="qr-reader" style="width: 100%; max-width: 500px; margin: 0 auto;"></div>
 
-                <div id="scanner-status" class="scanner-status">Ready to scan...</div>
+                <div class="scanner-controls">
+                    <button id="switch-camera-btn" class="btn btn-secondary btn-small" style="display: none;">
+                        🔄 Switch Camera
+                    </button>
+                    <div id="scanner-status" class="scanner-status">Ready to scan...</div>
+                </div>
 
                 <div id="last-scanned-indicator" class="last-scanned-indicator" style="display: none;"></div>
 
@@ -329,9 +334,22 @@
 
 
 
-    .scanner-status {
-
+    .scanner-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
         margin-top: 15px;
+    }
+
+    #switch-camera-btn {
+        width: 100%;
+        max-width: 200px;
+        margin: 0 auto;
+        display: none;
+        /* Only show when scanner is active */
+    }
+
+    .scanner-status {
 
         padding: 12px;
 

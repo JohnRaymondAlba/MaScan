@@ -48,10 +48,26 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+let currentStream = null;
+let currentFacingMode = 'environment'; // Default to back camera
+let scanInterval = null;
+
 function startQRScanner() {
+    // Show switch camera button if browser supports it
+    const switchBtn = document.getElementById('switch-camera-btn');
+    if (switchBtn) {
+        switchBtn.style.display = 'inline-block';
+        if (!switchBtn.onclick) {
+            switchBtn.onclick = toggleCamera;
+        }
+    }
+
+    // Stop existing stream and interval
+    stopScanner();
+
     const constraints = {
         video: {
-            facingMode: 'user',
+            facingMode: currentFacingMode,
             width: { ideal: 640 },
             height: { ideal: 480 }
         }
@@ -65,15 +81,17 @@ function startQRScanner() {
     video.style.maxWidth = '500px';
     video.style.display = 'block';
     video.autoplay = true;
+    video.setAttribute('playsinline', true); // Required for iOS
 
     readerContainer.innerHTML = '';
     readerContainer.appendChild(video);
 
     navigator.mediaDevices.getUserMedia(constraints)
         .then(stream => {
+            currentStream = stream;
             video.srcObject = stream;
 
-            const scanInterval = setInterval(() => {
+            scanInterval = setInterval(() => {
                 if (video.readyState === video.HAVE_ENOUGH_DATA) {
                     canvas.width = video.videoWidth;
                     canvas.height = video.videoHeight;
@@ -83,7 +101,6 @@ function startQRScanner() {
 
                     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                     
-                    // Make sure jsQR is loaded
                     if (typeof jsQR === 'undefined') {
                         console.warn('jsQR library not loaded yet');
                         return;
@@ -95,7 +112,6 @@ function startQRScanner() {
 
                     if (code) {
                         const now = Date.now();
-                        // Prevent scanning the same code multiple times within 3 seconds
                         if (code.data !== lastScannedCode || (now - lastScanTime > 3000)) {
                             lastScannedCode = code.data;
                             lastScanTime = now;
@@ -109,7 +125,28 @@ function startQRScanner() {
         .catch(err => {
             console.error('Camera access denied:', err);
             showError('Camera access denied. Enter QR code manually.');
+            if (switchBtn) switchBtn.style.display = 'none';
         });
+}
+
+function stopScanner() {
+    if (scanInterval) {
+        clearInterval(scanInterval);
+        scanInterval = null;
+    }
+    if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
+        currentStream = null;
+    }
+}
+
+function toggleCamera() {
+    currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
+    const statusText = document.getElementById('scanner-status');
+    if (statusText) {
+        statusText.textContent = `Switching to ${currentFacingMode === 'user' ? 'front' : 'back'} camera...`;
+    }
+    startQRScanner();
 }
 
 function submitQRCode() {
