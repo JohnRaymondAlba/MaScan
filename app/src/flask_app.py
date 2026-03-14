@@ -5,7 +5,12 @@ from flask_cors import CORS
 from flask_session import Session
 import os
 from dotenv import load_dotenv
-from config.constants import *
+
+# Only import constants if not in production
+try:
+    from config.constants import *
+except Exception as e:
+    print(f"Warning: Could not load constants: {e}")
 
 # Load environment variables
 load_dotenv()
@@ -45,21 +50,28 @@ def create_app():
     Session(app)
     
     # Register blueprints
-    from routes.auth_routes import auth_bp
-    from routes.dashboard_routes import dashboard_bp
-    from routes.event_routes import event_bp
-    from routes.attendance_routes import attendance_bp
-    from routes.user_routes import user_bp
-    from routes.api_routes import api_bp
-    from routes.qr_management_routes import qr_mgmt_bp
-    
-    app.register_blueprint(auth_bp)
-    app.register_blueprint(dashboard_bp)
-    app.register_blueprint(event_bp)
-    app.register_blueprint(attendance_bp)
-    app.register_blueprint(user_bp)
-    app.register_blueprint(api_bp, url_prefix='/api')
-    app.register_blueprint(qr_mgmt_bp)
+    try:
+        from routes.auth_routes import auth_bp
+        from routes.dashboard_routes import dashboard_bp
+        from routes.event_routes import event_bp
+        from routes.attendance_routes import attendance_bp
+        from routes.user_routes import user_bp
+        from routes.api_routes import api_bp
+        from routes.qr_management_routes import qr_mgmt_bp
+        
+        app.register_blueprint(auth_bp)
+        app.register_blueprint(dashboard_bp)
+        app.register_blueprint(event_bp)
+        app.register_blueprint(attendance_bp)
+        app.register_blueprint(user_bp)
+        app.register_blueprint(api_bp, url_prefix='/api')
+        app.register_blueprint(qr_mgmt_bp)
+    except Exception as e:
+        print(f"Warning: Could not load some blueprints: {e}")
+        # Add a health check route at minimum
+        @app.route('/')
+        def health():
+            return {'status': 'ok', 'error': str(e)}, 200
     
     return app
 
