@@ -68,10 +68,21 @@ def create_app():
         app.register_blueprint(qr_mgmt_bp)
     except Exception as e:
         print(f"Warning: Could not load some blueprints: {e}")
-        # Add a health check route at minimum
-        @app.route('/')
-        def health():
-            return {'status': 'ok', 'error': str(e)}, 200
+        import traceback
+        print(traceback.format_exc())
+        # Add a fallback error handler
+        @app.errorhandler(404)
+        def not_found(error):
+            return {'error': 'Route not found', 'message': str(error), 'blueprint_error': str(e)}, 404
+    
+    # Add global error handlers
+    @app.errorhandler(500)
+    def internal_error(error):
+        return {'error': 'Internal server error', 'message': str(error)}, 500
+    
+    @app.errorhandler(404)
+    def not_found_handler(error):
+        return {'error': 'Route not found', 'message': str(error)}, 404
     
     return app
 
