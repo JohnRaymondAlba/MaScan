@@ -48,7 +48,7 @@
     <div class="actions">
         <a href="{{ url_for('event.view_event', event_id=event[0]) }}" class="btn btn-secondary">Back to Event</a>
         {% if user_role == 'admin' %}
-        <a href="{{ url_for('event.export_event', event_id=event[0]) }}" class="btn btn-primary">Export PDF</a>
+        <a href="#" onclick="exportEventPDF('{{ event[0] }}'); return false;" class="btn btn-primary">Export PDF</a>
         {% endif %}
     </div>
 </div>

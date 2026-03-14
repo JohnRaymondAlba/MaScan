@@ -10,6 +10,15 @@ event_bp = Blueprint('event', __name__, url_prefix='/events')
 db = Database()
 
 
+def safe_parse_date(date_str):
+    """Safely parse a date string. Returns a date object or a very future date if invalid."""
+    try:
+        return datetime.strptime(date_str, '%Y-%m-%d').date()
+    except (ValueError, TypeError):
+        # Return a date far in the future so invalid dates appear at the end of future events
+        return datetime(9999, 12, 31).date()
+
+
 @event_bp.route('/')
 @login_required
 def list_events():
@@ -42,10 +51,10 @@ def list_events():
             future_events.append(event)
     
     # Sort past events by date descending (most recent first)
-    past_events.sort(key=lambda e: datetime.strptime(e[2], '%Y-%m-%d'), reverse=True)
+    past_events.sort(key=lambda e: safe_parse_date(e[2]), reverse=True)
     
     # Sort future events by date ascending (soonest first)
-    future_events.sort(key=lambda e: datetime.strptime(e[2], '%Y-%m-%d'))
+    future_events.sort(key=lambda e: safe_parse_date(e[2]))
     
     return render_template(
         'events/list.html',
@@ -75,6 +84,27 @@ def create_event():
                 username=username,
                 user_role=user[3],
                 error='Event name and date are required'
+            )
+        
+        # Validate date format
+        try:
+            event_date_obj = datetime.strptime(event_date, '%Y-%m-%d').date()
+        except ValueError:
+            return render_template(
+                'events/create.html',
+                username=username,
+                user_role=user[3],
+                error='Invalid date format. Please use YYYY-MM-DD.'
+            )
+        
+        # Restrict to today or future
+        today = datetime.now().date()
+        if event_date_obj < today:
+            return render_template(
+                'events/create.html',
+                username=username,
+                user_role=user[3],
+                error='Event date cannot be in the past.'
             )
         
         # Create event
@@ -140,6 +170,29 @@ def edit_event(event_id):
                 user_role=user[3],
                 event=event,
                 error='Event name and date are required'
+            )
+        
+        # Validate date format
+        try:
+            event_date_obj = datetime.strptime(event_date, '%Y-%m-%d').date()
+        except ValueError:
+            return render_template(
+                'events/edit.html',
+                username=username,
+                user_role=user[3],
+                event=event,
+                error='Invalid date format. Please use YYYY-MM-DD.'
+            )
+            
+        # Restrict to today or future
+        today = datetime.now().date()
+        if event_date_obj < today:
+            return render_template(
+                'events/edit.html',
+                username=username,
+                user_role=user[3],
+                event=event,
+                error='Event date cannot be in the past.'
             )
         
         db._execute(
