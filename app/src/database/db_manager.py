@@ -118,44 +118,61 @@ class Database:
     
     def __init__(self, db_url: str = None):
         """Initialize database connection."""
+        self.engine = None
+        self.Session = None
+        self.is_connected = False
+        
         if db_url is None:
             db_url = os.getenv('DATABASE_URL')
         
         if not db_url:
-            # Fallback to SQLite for local development
-            db_path = os.path.join(os.path.dirname(__file__), '../..', 'mascan_attendance.db')
-            db_url = f'sqlite:///{db_path}'
-            print(f"Using SQLite fallback: {db_path}")
-        else:
-            # Fix psycopg2 driver prefix for standard postgresql:// URLs
-            if db_url.startswith('postgresql://'):
-                db_url = db_url.replace('postgresql://', 'postgresql+psycopg2://', 1)
-            print("Using Supabase/PostgreSQL database")
+            print("WARNING: DATABASE_URL environment variable not set!")
+            print("App will run but database operations will fail.")
+            print("Set DATABASE_URL in Vercel environment variables.")
+            self.is_connected = False
+            return
         
-        # Create engine with no connection pooling for serverless
+        # Fix psycopg2 driver prefix for standard postgresql:// URLs
+        if db_url.startswith('postgresql://'):
+            db_url = db_url.replace('postgresql://', 'postgresql+psycopg2://', 1)
+        
         try:
+            print("Attempting database connection...")
+            # Create engine with no connection pooling for serverless
             self.engine = create_engine(
                 db_url,
                 poolclass=NullPool,
                 echo=False,
                 connect_args={'connect_timeout': 10} if 'postgresql' in db_url else {}
             )
+            
+            # Test connection
+            with self.engine.connect() as conn:
+                conn.execute("SELECT 1")
+            
+            # Create all tables
+            Base.metadata.create_all(self.engine)
+            self.Session = sessionmaker(bind=self.engine)
+            self.is_connected = True
+            print("Database connected successfully")
+            self._ensure_admin_role()
+            
         except Exception as e:
-            print(f"Error creating engine: {e}")
-            self.engine = create_engine('sqlite:///mascan_attendance.db', poolclass=NullPool)
-        
-        # Create all tables
-        Base.metadata.create_all(self.engine)
-        self.Session = sessionmaker(bind=self.engine)
-        
-        self._ensure_admin_role()
-    
-    def _get_session(self):
+            print(f"ERROR connecting to database: {e}")
+            print(f"Database URL pattern: {db_url[:50]}...")
+            self.is_connected = False
+            self.Session = None
+def _get_session(self):
         """Get a new database session."""
+        if not self.is_connected or not self.Session:
+            raise RuntimeError("Database not connected. Set DATABASE_URL environment variable.")
         return self.Session()
     
     def _ensure_admin_role(self):
         """Ensure admin user exists."""
+        if not self.is_connected:
+            return
+            
         try:
             session = self._get_session()
             admin = session.query(User).filter_by(username='admin').first()

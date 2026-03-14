@@ -20,56 +20,63 @@ if src_dir not in sys.path:
 
 # Create fallback app first
 fallback_app = Flask(__name__)
-fallback_errors = []
 
 try:
     from flask_app import create_app
     app = create_app()
     
-    # Add health check route
-    @app.route('/health', methods=['GET'])
-    def health():
-        return {'status': 'ok', 'message': 'MaScan app is running on Vercel'}, 200
-    
-    # Add debug route to check app state
-    @app.route('/_debug', methods=['GET'])
-    def debug():
-        return jsonify({
-            'status': 'ok',
-            'environment': os.getenv('FLASK_ENV', 'unknown'),
-            'blueprints': list(app.blueprints.keys()),
-            'routes': [str(rule) for rule in app.url_map.iter_rules()]
-        }), 200
-        
 except Exception as e:
     # Log error for debugging
     error_msg = f"Failed to create Flask app: {str(e)}\n{traceback.format_exc()}"
     print(error_msg)
-    fallback_errors.append(error_msg)
     
     # Use fallback app
     app = fallback_app
     
     @app.route('/')
-    def root():
-        return jsonify({
-            'error': 'Failed to initialize MaScan app',
-            'details': str(e),
-            'initialization_errors': fallback_errors
-        }), 500
-    
-    @app.route('/health', methods=['GET'])
-    def health():
-        return jsonify({
-            'status': 'error',
-            'error': str(e),
-            'full_traceback': error_msg
-        }), 500
-    
-    @app.route('/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE'])
-    def catch_all(path):
+    @app.route('/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'])
+    def catch_all(path=''):
         return jsonify({
             'error': 'App initialization failed',
-            'requested_path': f'/{path}',
-            'message': str(e)
+            'details': str(e),
+            'full_error': error_msg,
+            'required_setup': {
+                'step_1': 'Go to Vercel dashboard → Project Settings → Environment Variables',
+                'step_2': 'Add DATABASE_URL with your Supabase PostgreSQL connection string',
+                'step_3': 'Add SECRET_KEY with a strong random key',
+                'step_4': 'Redeploy the project',
+                'docs': 'See DEPLOYMENT.md in your repository for details'
+            }
         }), 500
+
+# Add health check and debug endpoints (work even if blueprint loading failed)
+@app.route('/health', methods=['GET'])
+def health():
+    """Health check endpoint."""
+    from database import db
+    db_status = 'connected' if hasattr(db, 'is_connected') and db.is_connected else 'disconnected'
+    
+    return jsonify({
+        'status': 'alive',
+        'database': db_status,
+        'environment': os.getenv('FLASK_ENV', 'development'),
+        'version': '1.0'
+    }), 200
+
+@app.route('/_debug', methods=['GET'])
+def debug():
+    """Debug endpoint showing app configuration."""
+    from database import db
+    
+    db_connected = hasattr(db, 'is_connected') and db.is_connected
+    
+    return jsonify({
+        'app_name': 'MaScan Attendance System',
+        'environment': os.getenv('FLASK_ENV', 'development'),
+        'database_connected': db_connected,
+        'has_database_url': bool(os.getenv('DATABASE_URL')),
+        'blueprints': list(app.blueprints.keys()),
+        'routes_count': len([rule for rule in app.url_map.iter_rules()]),
+        'static_folder': app.static_folder,
+        'template_folder': app.template_folder
+    }), 200

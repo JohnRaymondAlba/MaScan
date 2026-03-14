@@ -1,6 +1,6 @@
 """Main Flask application for MaScan Attendance System."""
 
-from flask import Flask
+from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_session import Session
 import os
@@ -47,42 +47,51 @@ def create_app():
     CORS(app)
     
     # Initialize Flask-Session
-    Session(app)
-    
-    # Register blueprints
     try:
-        from routes.auth_routes import auth_bp
-        from routes.dashboard_routes import dashboard_bp
-        from routes.event_routes import event_bp
-        from routes.attendance_routes import attendance_bp
-        from routes.user_routes import user_bp
-        from routes.api_routes import api_bp
-        from routes.qr_management_routes import qr_mgmt_bp
-        
-        app.register_blueprint(auth_bp)
-        app.register_blueprint(dashboard_bp)
-        app.register_blueprint(event_bp)
-        app.register_blueprint(attendance_bp)
-        app.register_blueprint(user_bp)
-        app.register_blueprint(api_bp, url_prefix='/api')
-        app.register_blueprint(qr_mgmt_bp)
+        Session(app)
     except Exception as e:
-        print(f"Warning: Could not load some blueprints: {e}")
-        import traceback
-        print(traceback.format_exc())
-        # Add a fallback error handler
-        @app.errorhandler(404)
-        def not_found(error):
-            return {'error': 'Route not found', 'message': str(error), 'blueprint_error': str(e)}, 404
+        print(f"Warning: Could not initialize sessions: {e}")
+    
+    # Import database to check connection status
+    from database import db
+    db_connected = hasattr(db, 'is_connected') and db.is_connected
+    
+    # Register blueprints only if database is connected
+    if db_connected:
+        try:
+            from routes.auth_routes import auth_bp
+            from routes.dashboard_routes import dashboard_bp
+            from routes.event_routes import event_bp
+            from routes.attendance_routes import attendance_bp
+            from routes.user_routes import user_bp
+            from routes.api_routes import api_bp
+            from routes.qr_management_routes import qr_mgmt_bp
+            
+            app.register_blueprint(auth_bp)
+            app.register_blueprint(dashboard_bp)
+            app.register_blueprint(event_bp)
+            app.register_blueprint(attendance_bp)
+            app.register_blueprint(user_bp)
+            app.register_blueprint(api_bp, url_prefix='/api')
+            app.register_blueprint(qr_mgmt_bp)
+            
+            print("All blueprints registered successfully")
+        except Exception as e:
+            print(f"Warning: Could not load some blueprints: {e}")
+            import traceback
+            print(traceback.format_exc())
+    else:
+        print("WARNING: Database not connected - blueprints not loaded")
+        print("DATABASE_URL environment variable may not be set")
     
     # Add global error handlers
     @app.errorhandler(500)
     def internal_error(error):
-        return {'error': 'Internal server error', 'message': str(error)}, 500
+        return jsonify({'error': 'Internal server error', 'message': str(error)}), 500
     
     @app.errorhandler(404)
     def not_found_handler(error):
-        return {'error': 'Route not found', 'message': str(error)}, 404
+        return jsonify({'error': 'Route not found', 'message': str(error)}), 404
     
     return app
 
