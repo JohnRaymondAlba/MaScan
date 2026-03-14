@@ -17,8 +17,10 @@ def scanner():
     username = session.get('username')
     user = db.get_user(username)
     
-    # Get active events
-    events = db.get_all_events()
+    # Get events for today only
+    today = datetime.now().strftime('%Y-%m-%d')
+    all_events = db.get_all_events()
+    events = [event for event in all_events if event[2] == today]
     
     return render_template(
         'scanner.html',
