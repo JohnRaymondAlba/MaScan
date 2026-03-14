@@ -22,31 +22,54 @@ if src_dir not in sys.path:
 fallback_app = Flask(__name__)
 
 try:
+    print("=" * 60)
+    print("Initializing MaScan Flask Application")
+    print(f"App directory: {app_dir}")
+    print(f"Src directory: {src_dir}")
+    print("=" * 60)
+    
     from flask_app import create_app
     app = create_app()
+    
+    print("✓ Flask app created successfully")
+    print("=" * 60)
     
 except Exception as e:
     # Log error for debugging
     error_msg = f"Failed to create Flask app: {str(e)}\n{traceback.format_exc()}"
     print(error_msg)
     
-    # Use fallback app
+    # Use fallback app with proper error response
     app = fallback_app
     
     @app.route('/')
+    @app.route('/health')
     @app.route('/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'])
     def catch_all(path=''):
+        if path == 'setup-help':
+            return jsonify({
+                'status': 'app-error',
+                'error': 'MaScan app failed to initialize',
+                'details': str(e),
+                'configuration_steps': {
+                    'step_1': 'Go to Vercel dashboard → Project Settings → Environment Variables',
+                    'step_2': 'Add DATABASE_URL with your Supabase PostgreSQL connection string',
+                    'step_3': 'Add SECRET_KEY with a strong random key (e.g., openssl rand -hex 32)',
+                    'step_4': 'Ensure FLASK_ENV is set to "production"',
+                    'step_5': 'Redeploy the project',
+                    'docs': 'See DEPLOYMENT.md and SUPABASE_SETUP.md in the repository'
+                },
+                'error_details': str(e),
+                'troubleshooting': [
+                    'Check Vercel logs for detailed error messages',
+                    'Verify all environment variables are set correctly',
+                    'Ensure Supabase database is running and accessible'
+                ]
+            }), 500
+        
         return jsonify({
-            'error': 'App initialization failed',
-            'details': str(e),
-            'full_error': error_msg,
-            'required_setup': {
-                'step_1': 'Go to Vercel dashboard → Project Settings → Environment Variables',
-                'step_2': 'Add DATABASE_URL with your Supabase PostgreSQL connection string',
-                'step_3': 'Add SECRET_KEY with a strong random key',
-                'step_4': 'Redeploy the project',
-                'docs': 'See DEPLOYMENT.md in your repository for details'
-            }
+            'status': 'error',
+            'message': 'Application initialization failed. Visit /setup-help for guidance.'
         }), 500
 
 # Add health check and debug endpoints (work even if blueprint loading failed)

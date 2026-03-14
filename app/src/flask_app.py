@@ -52,6 +52,26 @@ def create_app():
     except Exception as e:
         print(f"Warning: Could not initialize sessions: {e}")
     
+    # Add basic health check routes first (work without database)
+    @app.route('/', methods=['GET'])
+    def home():
+        return jsonify({
+            'status': 'ok',
+            'app': 'MaScan Attendance System',
+            'version': '1.0'
+        }), 200
+    
+    @app.route('/health', methods=['GET'])
+    def health_check():
+        from database import db
+        db_connected = hasattr(db, 'is_connected') and db.is_connected
+        
+        return jsonify({
+            'status': 'ok' if db_connected else 'partial',
+            'database': 'connected' if db_connected else 'disconnected',
+            'app': 'MaScan Attendance System'
+        }), 200 if db_connected else 503
+    
     # Import database to check connection status
     from database import db
     db_connected = hasattr(db, 'is_connected') and db.is_connected
@@ -83,6 +103,20 @@ def create_app():
     else:
         print("WARNING: Database not connected - blueprints not loaded")
         print("DATABASE_URL environment variable may not be set")
+        print("Visit /setup-help for configuration instructions")
+        
+        @app.route('/setup-help', methods=['GET'])
+        def setup_help():
+            return jsonify({
+                'error': 'Database not configured',
+                'steps': [
+                    'Go to Vercel project dashboard',
+                    'Navigate to Settings → Environment Variables',
+                    'Add DATABASE_URL with your Supabase connection string',
+                    'Redeploy the project'
+                ],
+                'docs': 'Check DEPLOYMENT.md and SUPABASE_SETUP.md in the repository'
+            }), 503
     
     # Add global error handlers
     @app.errorhandler(500)
